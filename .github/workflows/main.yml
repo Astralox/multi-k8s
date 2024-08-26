@@ -34,6 +34,8 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Docker build & test
+      uses: actions/checkout@v4
+    - name: Build & Test
       run: |
         docker build -t astralox/multi-client -f ./client/Dockerfile.dev ./client
         docker run -e CI=true astralox/multi-client npm test
