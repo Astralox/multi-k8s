@@ -43,23 +43,17 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          context: "{{defaultContext}}:client"
-          file: "{{defaultContext}}:client"
+          file: "client"
           tags: |
             astralox/multi-client-k8s-gh:latest
             astralox/multi-client-k8s-gh:${{ github.sha }}
-            astralox/multi-server-k8s-gh:latest
-            astralox/multi-server-k8s-gh:${{ github.sha }}
-            astralox/multi-worker-k8s-gh:latest
-            astralox/multi-worker-k8s-gh:${{ github.sha }}
             
       - name: Build and push server
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          context: "{{defaultContext}}:server"
-          file: "{{defaultContext}}:server"
+          file: "server"
           tags: |
             astralox/multi-server-k8s-gh:latest
             astralox/multi-server-k8s-gh:${{ github.sha }}
@@ -69,8 +63,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          context: "{{defaultContext}}:worker"
-          file: "{{defaultContext}}:worker"
+          file: "worker"
           tags: |
             astralox/multi-worker-k8s-gh:latest
             astralox/multi-worker-k8s-gh:${{ github.sha }}
