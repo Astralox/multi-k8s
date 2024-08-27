@@ -5,28 +5,11 @@ name: Run Azure Login With a Service Principal Secret
 jobs:
 
   build-and-deploy:
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     steps:
-
-    - uses: azure/login@v2
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-        enable-AzPSSession: true
-
-    - name: Azure CLI script
-      uses: azure/cli@v2
-      with:
-        azcliversion: latest
-        inlineScript: |
-          az account show
-
-    - name: Azure PowerShell script
-      uses: azure/powershell@v2
-      with:
-        azPSVersion: "latest"
-        inlineScript: |
-          Get-AzWebApp
-
     - name: Docker Login
       uses: docker/login-action@v3.3.0
       with:
@@ -35,9 +18,69 @@ jobs:
 
     - name: Docker build & test
       uses: actions/checkout@v4
-    - name: Build & Test
-      run: |
-        docker build -t astralox/multi-client -f ./client/Dockerfile.dev ./client
-        docker run -e CI=true astralox/multi-client npm test
 
-        
+    - name: Test
+      run: |-
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker build -t rallycoding/react-test -f ./client/Dockerfile.dev ./client
+        docker run -e CI=true rallycoding/react-test npm test
+      
+    - name: Build & Test
+      run: |-
+        docker build -t astralox/multi-client-k8s-gh:latest -t astralox/multi-client-k8s-gh:${{ github.sha }} -f ./client/Dockerfile ./client
+        docker build -t astralox/multi-server-k8s-gh:latest -t astralox/multi-server-k8s-gh:${{ github.sha }} -f ./server/Dockerfile ./server
+        docker build -t astralox/multi-worker-k8s-gh:latest -t astralox/multi-worker-k8s-gh:${{ github.sha }} -f ./worker/Dockerfile ./worker
+
+    - name: Push
+      run: |-
+        docker push rallycoding/multi-client-k8s-gh:latest
+        docker push rallycoding/multi-server-k8s-gh:latest
+        docker push rallycoding/multi-worker-k8s-gh:latest
+  
+        docker push rallycoding/multi-client-k8s-gh:${{ env.SHA }}
+        docker push rallycoding/multi-server-k8s-gh:${{ env.SHA }}
+        docker push rallycoding/multi-worker-k8s-gh:${{ env.SHA }}
+
+  deploy:
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      # Checks out the repository this file is in
+      - uses: actions/checkout@v4
+  
+      # Logs in with your Azure credentials
+      - name: Azure login
+        uses: azure/login@v1.4.6
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    
+      # Checks out the repository this file is in
+      - uses: actions/checkout@v4
+
+      # Logs in with your Azure credentials
+      - name: Azure login
+        uses: azure/login@v1.4.6
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: Azure/k8s-deploy@v5
+        with:
+           resource-group: multi-k8s-dal
+           name: multi-k8s-dal
+           action: deploy
+           strategy: basic
+      
+           private-cluster: true
+           manifests: |
+              k8s
+           images: |
+              hub.docker.com/astralox/multi-client:${{ github.sha }}
+              hub.docker.com/astralox/multi-server:${{ github.sha }}
+              hub.docker.com/astralox/multi-worker:${{ github.sha }}
