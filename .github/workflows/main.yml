@@ -43,7 +43,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          file: "client"
+          file: "client/Dockerfile"
           tags: |
             astralox/multi-client-k8s-gh:latest
             astralox/multi-client-k8s-gh:${{ github.sha }}
@@ -53,7 +53,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          file: "server"
+          file: "server/Dockerfile"
           tags: |
             astralox/multi-server-k8s-gh:latest
             astralox/multi-server-k8s-gh:${{ github.sha }}
@@ -63,7 +63,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          file: "worker"
+          file: "worker/Dockerfile"
           tags: |
             astralox/multi-worker-k8s-gh:latest
             astralox/multi-worker-k8s-gh:${{ github.sha }}
