@@ -41,17 +41,13 @@ jobs:
           docker build -t astralox/multi-client-k8s-gh:latest -t astralox/multi-client-k8s-gh:${{ github.sha }} -f ./client/Dockerfile ./client
           docker build -t astralox/multi-server-k8s-gh:latest -t astralox/multi-server-k8s-gh:${{ github.sha }} -f ./server/Dockerfile ./server
           docker build -t astralox/multi-worker-k8s-gh:latest -t astralox/multi-worker-k8s-gh:${{ github.sha }} -f ./worker/Dockerfile ./worker
-
-      - name: Push
-        run: |-
           docker push astralox/multi-client-k8s-gh:latest
           docker push astralox/multi-server-k8s-gh:latest
           docker push astralox/multi-worker-k8s-gh:latest
-          
           docker push astralox/multi-client-k8s-gh:${{ github.sha }}
           docker push astralox/multi-server-k8s-gh:${{ github.sha }}
           docker push astralox/multi-worker-k8s-gh:${{ github.sha }}
-
+          
       - uses: azure/setup-kubectl@v4
       
       # Set the target AKS cluster.
