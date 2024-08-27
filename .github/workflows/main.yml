@@ -29,24 +29,52 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-and-test]
     steps:
-      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       
-      - uses: Azure/docker-login@v1
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          login-server: hub.docker.com
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       
-      - run: |-
-          docker build -t astralox/multi-client-k8s-gh:latest -t astralox/multi-client-k8s-gh:${{ github.sha }} -f ./client/Dockerfile ./client
-          docker build -t astralox/multi-server-k8s-gh:latest -t astralox/multi-server-k8s-gh:${{ github.sha }} -f ./server/Dockerfile ./server
-          docker build -t astralox/multi-worker-k8s-gh:latest -t astralox/multi-worker-k8s-gh:${{ github.sha }} -f ./worker/Dockerfile ./worker
-          docker push astralox/multi-client-k8s-gh:latest
-          docker push astralox/multi-server-k8s-gh:latest
-          docker push astralox/multi-worker-k8s-gh:latest
-          docker push astralox/multi-client-k8s-gh:${{ github.sha }}
-          docker push astralox/multi-server-k8s-gh:${{ github.sha }}
-          docker push astralox/multi-worker-k8s-gh:${{ github.sha }}
+      - name: Build and push client
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: true
+          context: "{{defaultContext}}:client"
+          file: "{{defaultContext}}:client"
+          tags: |
+            astralox/multi-client-k8s-gh:latest
+            astralox/multi-client-k8s-gh:${{ github.sha }}
+            astralox/multi-server-k8s-gh:latest
+            astralox/multi-server-k8s-gh:${{ github.sha }}
+            astralox/multi-worker-k8s-gh:latest
+            astralox/multi-worker-k8s-gh:${{ github.sha }}
+            
+      - name: Build and push server
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: true
+          context: "{{defaultContext}}:server"
+          file: "{{defaultContext}}:server"
+          tags: |
+            astralox/multi-server-k8s-gh:latest
+            astralox/multi-server-k8s-gh:${{ github.sha }}
+
+      - name: Build and push worker
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: true
+          context: "{{defaultContext}}:worker"
+          file: "{{defaultContext}}:worker"
+          tags: |
+            astralox/multi-worker-k8s-gh:latest
+            astralox/multi-worker-k8s-gh:${{ github.sha }}
+            
           
       - uses: azure/setup-kubectl@v4
       
