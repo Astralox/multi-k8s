@@ -23,7 +23,7 @@ jobs:
       run: |-
         docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
         docker build -t astralox/multi-client -f ./client/Dockerfile.dev ./client
-        docker run -e CI=true astralox/react-test npm test
+        docker run -e CI=true astralox/multi-client npm test
       
     - name: Build & Test
       run: |-
