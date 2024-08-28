@@ -8,7 +8,7 @@
 #     c. AZURE_CREDENTIALS with the output of `az ad sp create-for-rbac --sdk-auth`
 #
 # 2. Change the values for the REGISTRY_NAME, CLUSTER_NAME, CLUSTER_RESOURCE_GROUP and NAMESPACE environment variables (below).
-
+#Error: error: the namespace from the provided object "kubernetes-dashboard" does not match the namespace "default". You must pass '--namespace=kubernetes-dashboard' to perform this operation.
 on: [push]
 
 # Environment variables available to all jobs and steps in this workflow
@@ -16,7 +16,7 @@ env:
   REGISTRY_NAME: multik8sacr
   CLUSTER_NAME: multi-k8s-dal
   CLUSTER_RESOURCE_GROUP: multi-k8s-dal
-  NAMESPACE: default
+  NAMESPACE: kubernetes-dashboard
   
 jobs:
   build:
