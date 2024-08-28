@@ -65,7 +65,19 @@ jobs:
     - uses: azure/k8s-deploy@v1
       with:
         manifests: |
-          k8s/
+          k8s\client-cluster-ip-service.yaml
+          k8s\client-deployment.yaml
+          k8s\dash-admin-user.yaml
+          k8s\dash-clusterrole.yaml
+          k8s\database-persistent-volume-claim.yaml
+          k8s\ingress-service.yaml
+          k8s\postgres-cluster-ip-service.yaml
+          k8s\postgres-deployment.yaml
+          k8s\redis-cluster-ip-service.yaml
+          k8s\redis-deployment.yaml
+          k8s\server-cluster-ip-service.yaml
+          k8s\server-deployment.yaml
+          k8s\worker-deployment.yaml
         images: |
           ${{ env.REGISTRY_NAME }}.azurecr.io/multi-client-k8s:${{ github.sha }}
           ${{ env.REGISTRY_NAME }}.azurecr.io/multi-server-k8s:${{ github.sha }}
