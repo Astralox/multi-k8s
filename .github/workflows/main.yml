@@ -34,11 +34,11 @@ jobs:
     
     # Container build and push to a Azure Container registry (ACR)
     - run: |
-        docker build -t ${{ env.REGISTRY_NAME }}.azurecr.io/multi-client-k8s:${{ github.sha }} -f ./client/Dockerfile .
+        docker build -t ${{ env.REGISTRY_NAME }}.azurecr.io/multi-client-k8s:${{ github.sha }} -f ./client/Dockerfile ./client
         docker push ${{ env.REGISTRY_NAME }}.azurecr.io/multi-client-k8s:${{ github.sha }}
-        docker build -t ${{ env.REGISTRY_NAME }}.azurecr.io/multi-server-k8s:${{ github.sha }} -f ./client/Dockerfile .
+        docker build -t ${{ env.REGISTRY_NAME }}.azurecr.io/multi-server-k8s:${{ github.sha }} -f ./client/Dockerfile ./server
         docker push ${{ env.REGISTRY_NAME }}.azurecr.io/multi-server-k8s:${{ github.sha }}
-        docker build -t ${{ env.REGISTRY_NAME }}.azurecr.io/multi-worker-k8s:${{ github.sha }} -f ./client/Dockerfile .
+        docker build -t ${{ env.REGISTRY_NAME }}.azurecr.io/multi-worker-k8s:${{ github.sha }} -f ./client/Dockerfile ./worker
         docker push ${{ env.REGISTRY_NAME }}.azurecr.io/multi-worker-k8s:${{ github.sha }}
     
     # Set the target Azure Kubernetes Service (AKS) cluster. 
