@@ -6,66 +6,63 @@ jobs:
 
   build-and-test:
     permissions:
+      packages: write
       contents: read
-      id-token: write
     runs-on: ubuntu-latest
+    
     steps:
+    - name: Check out the repo
+      uses: actions/checkout@v4
+    
     - name: Docker Login
       uses: docker/login-action@v3.3.0
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Docker build & test client
-      uses: actions/checkout@v4
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+      with:
+        images: |-
+          astralox/multi-client-k8s-gh
+          astralox/multi-server-k8s-gh
+          astralox/multi-worker-k8s-gh
 
-    - name: Test
-      run: |-
-        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-        docker build -t astralox/multi-client -f ./client/Dockerfile.dev ./client
-        docker run -e CI=true astralox/multi-client npm test
+    - name: Build and push Docker image
+      id: pushclient
+      uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+      with:
+        context: ./client
+        file: ./client/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Build and push Docker image
+      id: pushserver
+      uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+      with:
+        context: ./server
+        file: ./server/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Build and push Docker image
+      id: pushworker
+      uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+      with:
+        context: ./worker
+        file: ./worker/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
 
   build:
     runs-on: ubuntu-latest
     needs: [build-and-test]
     steps:
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      
-      - name: Build and push client
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          file: "client/Dockerfile"
-          tags: |
-            astralox/multi-client-k8s-gh:latest
-            astralox/multi-client-k8s-gh:${{ github.sha }}
-            
-      - name: Build and push server
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          file: "server/Dockerfile"
-          tags: |
-            astralox/multi-server-k8s-gh:latest
-            astralox/multi-server-k8s-gh:${{ github.sha }}
-
-      - name: Build and push worker
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          file: "worker/Dockerfile"
-          tags: |
-            astralox/multi-worker-k8s-gh:latest
-            astralox/multi-worker-k8s-gh:${{ github.sha }}
-            
-          
       - uses: azure/setup-kubectl@v4
       
       # Set the target AKS cluster.
