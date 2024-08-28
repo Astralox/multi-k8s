@@ -16,7 +16,7 @@ env:
   REGISTRY_NAME: multik8sacr
   CLUSTER_NAME: multi-k8s-dal
   CLUSTER_RESOURCE_GROUP: multi-k8s-dal
-  NAMESPACE: default
+  NAMESPACE: kubernetes-dashboard
   
 jobs:
   build:
